@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase'; // クライアントのパスに合わせて調整してください
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,13 +18,23 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // TODO: Supabase Auth のログイン処理を呼び出す
-      // const { error } = await supabase.auth.signInWithPassword({ email, password });
-      // if (error) throw error;
-      
-      router.push('/');
+      // 1. Supabase Auth でログインを実行
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
+
+      // 2. ログインに成功したらダッシュボードへ遷移
+      if (data.session) {
+        router.push('/');
+        router.refresh(); // キャッシュを更新してダッシュボードの表示を強制更新
+      }
     } catch (err: any) {
-      setError(err.message || 'ログインに失敗しました');
+      setError(err.message || 'メールアドレスまたはパスワードが正しくありません。');
     } finally {
       setLoading(false);
     }
