@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase'; // クライアントのパスに合わせて調整してください
+import { supabase } from '@/lib/supabase'; // パスをご自身の環境に合わせて調整してください
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,28 +13,34 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // フォームのデフォルト送信（ページリロード）を防止
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Supabase Auth でログインを実行
+      console.log('ログイン処理を開始します:', email);
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) {
-        throw signInError;
+        console.error('Supabase ログインエラー:', signInError);
+        setError(`ログインエラー: ${signInError.message}`);
+        return;
       }
 
-      // 2. ログインに成功したらダッシュボードへ遷移
+      console.log('ログイン成功:', data);
+
       if (data.session) {
+        console.log('ダッシュボードへ遷移します...');
         router.push('/');
-        router.refresh(); // キャッシュを更新してダッシュボードの表示を強制更新
+        router.refresh();
       }
     } catch (err: any) {
-      setError(err.message || 'メールアドレスまたはパスワードが正しくありません。');
+      console.error('予期せぬエラーが発生しました:', err);
+      setError('ログイン中に予期せぬエラーが発生しました。');
     } finally {
       setLoading(false);
     }
@@ -45,11 +51,11 @@ export default function LoginPage() {
       <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md w-full shadow-2xl">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-100">おかえりなさい</h1>
-          <p className="text-slate-400 text-sm mt-1">親子間ローン管理アプリにログイン</p>
+          <p className="text-slate-400 text-sm mt-1">アカウントにログイン</p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm mb-6">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm mb-6 break-words">
             {error}
           </div>
         )}
