@@ -12,8 +12,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // フォームのデフォルト送信（ページリロード）を防止
+
+
+const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
 
@@ -35,8 +37,9 @@ export default function LoginPage() {
 
       if (data.session) {
         console.log('ダッシュボードへ遷移します...');
-        router.push('/');
-        router.refresh();
+        // router.push('/') の代わりに画面全体をリロードしてトップページへ遷移させる
+        // これによりミドルウェアやサーバーコンポーネントが最新の認証状態を取得できます
+        window.location.href = '/';
       }
     } catch (err: any) {
       console.error('予期せぬエラーが発生しました:', err);
